@@ -38,7 +38,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/data'); 
+        const response = await axios.get('https://sustainability-dashboard-4x3k.onrender.com/api/data');
         if (response.data.success) {
           setData(response.data.data);
         }

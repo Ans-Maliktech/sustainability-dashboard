@@ -24,7 +24,7 @@ const Admin = () => {
 
     try {
       // Ensure this matches your backend URL exactly
-      await axios.post('http://localhost:5000/api/upload', formData, {
+      await axios.post('https://sustainability-dashboard-4x3k.onrender.com/api/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setStatus('success');

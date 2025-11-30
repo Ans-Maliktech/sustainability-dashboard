@@ -27,6 +27,18 @@ exports.uploadExcel = async (req, res) => {
       });
     }
 
+    // 🛡️ SECURITY CHECK: Validate Column Headers Immediately
+    const fileHeaders = Object.keys(jsonData[0]);
+    const requiredHeaders = ['metric_name', 'metric_value', 'date', 'category'];
+    const missingHeaders = requiredHeaders.filter(h => !fileHeaders.includes(h));
+    
+    if (missingHeaders.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid File Format. Missing required columns: ${missingHeaders.join(', ')}. Please use the correct template.`
+      });
+    }
+
     // Validate and transform data
     const transformedData = [];
     const errors = [];
@@ -36,24 +48,6 @@ exports.uploadExcel = async (req, res) => {
       const rowNumber = i + 2; // Excel row number (accounting for header)
 
       try {
-        // Check required fields
-        if (!row.metric_name) {
-          errors.push(`Row ${rowNumber}: Missing metric_name`);
-          continue;
-        }
-        if (row.metric_value === undefined || row.metric_value === null) {
-          errors.push(`Row ${rowNumber}: Missing metric_value`);
-          continue;
-        }
-        if (!row.date) {
-          errors.push(`Row ${rowNumber}: Missing date`);
-          continue;
-        }
-        if (!row.category) {
-          errors.push(`Row ${rowNumber}: Missing category`);
-          continue;
-        }
-
         // Parse and validate metric_value
         const metricValue = parseFloat(row.metric_value);
         if (isNaN(metricValue)) {
@@ -78,9 +72,13 @@ exports.uploadExcel = async (req, res) => {
 
         // Validate category
         const validCategories = ['Carbon', 'Water', 'Energy', 'Waste', 'Other'];
-        const category = String(row.category).trim();
-        if (!validCategories.includes(category)) {
-          errors.push(`Row ${rowNumber}: Invalid category. Must be one of: ${validCategories.join(', ')}`);
+        // Handle case sensitivity nicely (e.g. "carbon" -> "Carbon")
+        let categoryInput = String(row.category).trim();
+        // Capitalize first letter to match validCategories
+        categoryInput = categoryInput.charAt(0).toUpperCase() + categoryInput.slice(1).toLowerCase();
+
+        if (!validCategories.includes(categoryInput)) {
+          errors.push(`Row ${rowNumber}: Invalid category '${row.category}'. Must be one of: ${validCategories.join(', ')}`);
           continue;
         }
 
@@ -88,7 +86,7 @@ exports.uploadExcel = async (req, res) => {
           metric_name: String(row.metric_name).trim(),
           metric_value: metricValue,
           date: parsedDate,
-          category: category
+          category: categoryInput
         });
 
       } catch (error) {
@@ -100,7 +98,7 @@ exports.uploadExcel = async (req, res) => {
     if (errors.length > 0 && transformedData.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'All rows have errors',
+        message: 'File contains errors. No data was imported.',
         errors: errors
       });
     }

@@ -76,7 +76,7 @@ MySQL Server (Local or Cloud)
 Installation
 
 # 1. Clone the Repository
-git clone [https://github.com/SyntropyTech/sustainability-dashboard.git](https://github.com/SyntropyTech/sustainability-dashboard.git)
+git clone [https://github.com/Ans-Maliktech/sustainability-dashboard.git](https://github.com/Ans-Maliktech/sustainability-dashboard.git)
 
 # 2. Install Dependencies
 cd server && npm install

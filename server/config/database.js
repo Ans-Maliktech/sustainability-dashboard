@@ -1,21 +1,21 @@
 const Sequelize = require('sequelize');
-require('dotenv').config(); // Load .env for local development
+require('dotenv').config();
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME || 'sustainability_db', // Use Render var OR local name
-  process.env.DB_USER || 'root',              // Use Render var OR local user
-  process.env.DB_PASS || '',                  // Use Render var OR local password
+  process.env.DB_NAME || 'sustainability_db',
+  process.env.DB_USER || 'root',
+  process.env.DB_PASS || '',
   {
-    host: process.env.DB_HOST || 'localhost', // Use Render var OR local host
+    host: process.env.DB_HOST || 'localhost',
     dialect: 'mysql',
     port: process.env.DB_PORT || 3306,
+    logging: false,
     dialectOptions: {
       ssl: {
-        require: true, // TiDB requires SSL
-        rejectUnauthorized: false // Fix for some self-signed cert issues
+        require: true, // <--- This is the key! Forces SSL
+        rejectUnauthorized: false
       }
-    },
-    logging: false
+    }
   }
 );
 
